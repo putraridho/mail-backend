@@ -1,0 +1,43 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator tsed {
+  provider = "tsed-prisma"
+  output   = "./generated/tsed"
+}
+
+model User {
+  id        String     @id @default(uuid())
+  /// TsED.Email()
+  email     String     @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  sent      SentMail[]
+  inbox     Mail[]
+}
+
+model Mail {
+  id         String    @id @default(uuid())
+  subject    String?
+  attachment Boolean?
+  createdAt  DateTime  @default(now())
+  to         User[]
+  from       SentMail?
+}
+
+model SentMail {
+  id     Int    @id @default(autoincrement())
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+  mail   Mail   @relation(fields: [mailId], references: [id])
+  mailId String @unique
+}
